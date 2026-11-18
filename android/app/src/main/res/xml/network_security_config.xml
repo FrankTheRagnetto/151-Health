@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Health parla in rete solo con Zepp, solo cifrato (Rete.java): niente http in chiaro,
+     e si fida solo dei certificati di sistema, non di quelli aggiunti a mano sul telefono. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

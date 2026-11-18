@@ -1,0 +1,843 @@
+/* ==========================================================================
+ * The 151 Health — foglio di stile unico (aspetto «Notte blu»).
+ *
+ * IL MONDO: la Scheda di prima, ripulita. Fondo blu-nero, superfici appena
+ * più chiare, un accento blu. Niente display grigi a segmenti (la 1.1.0
+ * «orologio da palestra» era tutta grigia e deprimente).
+ *
+ * Il colore è il verdetto e sta SUL NUMERO e sulla spunta: verde meglio, rosso
+ * peggio, oro record. Ogni zona dell'app ha il suo colore (sport blu, sonno
+ * viola, sostanze verde acqua, peso arancio): lo stesso nel calendario e nella
+ * barra in fondo.
+ *
+ * Due voci di carattere:
+ *   Barlow Cond titoli, etichette, tasti: maiuscole, spaziate
+ *   Barlow      il testo da leggere e i numeri
+ * I nomi delle variabili (--resin, --print…) vengono dalla Scheda: cambiarli
+ * vorrebbe dire toccare ogni regola qui sotto per niente.
+ * ======================================================================== */
+
+@font-face { font-family: 'Stampa'; src: url(fonts/barlow-condensed-latin-600-normal.woff2) format('woff2');
+             font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Stampa'; src: url(fonts/barlow-condensed-latin-700-normal.woff2) format('woff2');
+             font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Testo'; src: url(fonts/barlow-latin-400-normal.woff2) format('woff2');
+             font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Testo'; src: url(fonts/barlow-latin-600-normal.woff2) format('woff2');
+             font-weight: 600 700; font-display: swap; }
+
+:root {
+  /* le superfici */
+  --resin:     #0d1013;   /* fondo blu-nero */
+  --resin-2:   #151a20;   /* schede */
+  --resin-3:   #1d242c;   /* tasti, campi */
+  --edge:      #2a333d;   /* bordo */
+  --print:     #e9eef3;   /* testo */
+  --print-dim: #8fa0b0;   /* testo secondario */
+  --accent:    #1b8bf9;   /* l'accento (= sport) */
+  --accent-solid: #1570d0; /* lo stesso blu più scuro, SOTTO il testo bianco: 4,9:1 invece di 3,4:1 */
+
+  /* le zone */
+  --sleep: #8b7cf6;
+  --sub:   #2bc4b4;
+  --wt:    #f39a4a;
+  --sport: #1b8bf9;   /* lo sport: palestra e ogni allenamento dell'orologio, un colore solo */
+
+  /* il verdetto (fissato: rosso peggio, verde meglio, oro record) */
+  --up:        #35c46a;
+  --down:      #e06060;
+  --pr:        #f0b429;
+  --glow:      #1b8bf9;   /* il recupero */
+  --live:      #ff8a3d;   /* il cronometro che gira */
+
+  --r-key:     12px;
+  --r-lcd:     8px;
+  --safe-b:    env(safe-area-inset-bottom, 0px);
+  --safe-t:    env(safe-area-inset-top, 0px);   /* 0 nel browser; >0 nell'APK */
+
+  --f-seg:   'Testo', Roboto, system-ui, sans-serif;   /* i numeri: Barlow pieno */
+  --f-print: 'Stampa', 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  --f-text:  'Testo', Roboto, system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--resin); color: var(--print);
+  font-family: var(--f-text); font-size: 16px; line-height: 1.4;
+  overscroll-behavior-y: contain;
+}
+button:focus { outline: none; }
+button:focus-visible, [role=button]:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+
+#app { padding: calc(16px + var(--safe-t)) 14px calc(96px + var(--safe-b)); max-width: 640px; margin: 0 auto; }
+
+/* --- scritte ------------------------------------------------------------- */
+h1 { font-family: var(--f-print); font-weight: 700; font-size: 30px; line-height: 1.05;
+     text-transform: uppercase; letter-spacing: .02em; margin: 6px 0 4px; }
+h2 { font-family: var(--f-print); font-weight: 700; font-size: 15px; color: var(--print-dim);
+     text-transform: uppercase; letter-spacing: .14em; margin: 30px 0 10px; }
+.sub { color: var(--print-dim); font-size: 14px; margin: 0 0 16px; }
+
+/* --- i numeri: un campo scuro, il numero chiaro e pieno -------------------
+   (la classe resta `lcd` per non toccare il disegno delle viste) */
+.lcd {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  background: var(--resin-3); color: var(--print); border-radius: var(--r-lcd);
+  font-family: var(--f-seg); font-weight: 700; font-variant-numeric: tabular-nums;
+  transition: color .18s ease-out, background-color .18s ease-out;
+}
+.dg { display: inline-block; white-space: nowrap; }
+.lcd small, .val small { font-family: var(--f-print); font-weight: 600; font-size: .62em;
+                         margin-left: .2em; letter-spacing: .04em; color: var(--print-dim); }
+
+/* --- superfici ----------------------------------------------------------- */
+.card {
+  background: var(--resin-2); border: 1px solid var(--edge);
+  border-radius: 14px; padding: 14px; margin-bottom: 12px;
+}
+.card.flat { background: transparent; border-style: dashed; }
+
+/* --- tasti di gomma ------------------------------------------------------ */
+/* align-items: il WebView 126 (telefono vero) dà ai tasti «flex-start» di serie, il Chromium delle prove no: senza
+   questa riga le caselle del calendario si stringevano e tagliavano le ore («:4»). 11/11 */
+button { font: inherit; color: inherit; cursor: pointer; align-items: normal; }
+
+.btn {
+  display: block; width: 100%; min-height: 54px; padding: 14px 16px; margin: 0 0 10px;
+  border: 0; border-radius: var(--r-key);
+  background: var(--resin-3); color: var(--print);
+  box-shadow: none;
+  font-family: var(--f-print); font-size: 18px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; text-align: center;
+}
+.btn:active { transform: scale(.985); }
+.btn.primary  { background: var(--accent-solid); color: #fff; }
+.btn.big      { min-height: 68px; font-size: 22px; }
+.btn.ghost    { background: transparent; border: 1px solid var(--edge); box-shadow: none; }
+.btn.danger   { background: transparent; border: 1px solid #5c3030; color: #e08585; box-shadow: none; }
+.btn.small    { min-height: 44px; padding: 10px 14px; font-size: 15px; width: auto; display: inline-block; margin: 0; }
+
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; }
+
+/* --- la barra in fondo: le zone dell'app -------------------------------- */
+#nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; background: var(--resin);   /* opaco: a .96 il testo sotto si leggeva fra le linguette (15/11) */
+  border-top: 1px solid var(--edge);
+  padding: 6px 8px calc(6px + var(--safe-b));
+}
+.navbtn {
+  flex: 1; background: none; border: 0; min-height: 56px; margin: 0 2px; padding: 26px 0 4px;
+  font-family: var(--f-print); font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--print-dim);
+  position: relative;
+}
+/* il segno della zona: un quadratino vuoto, pieno del suo colore quando sei lì */
+.navbtn::before {
+  content: ''; position: absolute; top: 6px; left: 50%; margin-left: -10px;
+  width: 20px; height: 20px; border-radius: 6px; border: 2px solid currentColor; box-sizing: border-box; opacity: .75;
+}
+.navbtn.on { color: var(--print); }
+.navbtn.on::before { background: var(--c); border-color: var(--c); opacity: 1; }
+body.workout-live #nav { display: none; }   /* durante l'allenamento: fuori dai piedi */
+
+/* --- dentro Sport, in alto: Palestra · Allenamenti · Record · Scheda ------ */
+#subnav { display: none; }
+body.in-sport #subnav {
+  display: flex; position: sticky; top: 0; z-index: 30; gap: 4px;
+  background: var(--resin); padding: calc(8px + var(--safe-t)) 14px 8px;
+  max-width: 640px; margin: 0 auto;
+}
+body.in-sport #app { padding-top: 8px; }
+body.workout-live #subnav { display: none; }
+body.workout-live #app { padding-top: calc(16px + var(--safe-t)); }
+.subbtn {
+  flex: 1; min-height: 44px; border: 1px solid var(--edge); border-radius: 10px; background: var(--resin-2);
+  font-family: var(--f-print); font-size: 14px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--print-dim);
+}
+.subbtn.on { background: var(--accent-solid); border-color: var(--accent-solid); color: #fff; }
+
+/* --- il calendario dei giorni ------------------------------------------- */
+.cal-top { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 12px; }
+.cal-top > div:first-child { flex: 1; min-width: 0; }
+.cal-top h1 { font-size: 26px; white-space: nowrap; margin-bottom: 0; }
+.kick { font-family: var(--f-print); font-size: 13px; font-weight: 700; letter-spacing: .1em;
+        text-transform: uppercase; color: var(--print-dim); }
+.cal-move { display: flex; gap: 6px; }
+.calbtn { min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid var(--edge);
+          background: var(--resin-2); font-size: 22px; font-weight: 600; color: var(--print); padding: 0 10px; }
+.calbtn.today { font-family: var(--f-print); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+/* La casella: un quadrato con i quattro
+   riquadri in piccolo — sonno | sport / peso | sostanze — tutti UGUALI (le forme diverse stonano; il decimale del peso è piccolo per starci).
+   ⚠ «pr» è già una classe globale (righe dei record): qui il record è «rec». Il bordo spesso del giorno scelto sta
+   FUORI (ombra), così dentro resta lo stesso spazio. */
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-h { text-align: center; font-size: 12px; font-weight: 600; color: var(--print-dim); padding-bottom: 2px; }
+.cal-d {
+  position: relative; aspect-ratio: 1 / 1; min-height: 44px; min-width: 0; border-radius: 9px;
+  background: var(--resin-2); border: 1px solid var(--edge); padding: 1px; color: var(--print);
+  display: flex; flex-direction: column; text-align: left;
+}
+.cal-d .n { font-size: 11px; line-height: 12px; height: 12px; font-weight: 600; font-variant-numeric: tabular-nums; padding-left: 3px; flex: 0 0 auto; }
+.cal-d .r { flex: 1; min-height: 0; display: flex; }
+.cal-d .r + .r { margin-top: 1px; }
+.cal-d .r i { flex: 1 1 0; min-width: 0; border-radius: 4px; background: rgba(255,255,255,.035);
+  display: flex; align-items: center; justify-content: center; font-style: normal; font-family: var(--f-print);
+  font-weight: 700; font-size: 13px; letter-spacing: -.01em; line-height: 1; overflow: hidden; white-space: nowrap; }
+.cal-d .r i + i { margin-left: 1px; }
+.cal-d .r i small { font-size: .78em; font-weight: 700; }
+.cal-d svg.ic { display: block; width: 15px; height: 15px; flex: 0 0 auto; fill: none; stroke: currentColor;
+  stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.cal-d svg.ic .f { fill: currentColor; stroke: none; }
+.cal-d i.two svg.ic { width: 11px; height: 11px; stroke-width: 2.8; }
+.cal-d i.two svg.ic + svg.ic { margin-left: 1px; }
+.cal-d i.s { background: rgba(139,124,246,.26); color: var(--print); }
+.cal-d i.s.g { color: #7ee39f; }
+.cal-d i.s.r { color: #ff8f8f; background: rgba(224,96,96,.26); }
+.cal-d i.a { background: rgba(27,139,249,.28); color: #8cc5ff; }
+.cal-d i.a.rec { background: rgba(240,180,41,.22); }
+.cal-d i.a svg.rec { color: var(--pr); }
+.cal-d i.w { background: rgba(243,154,74,.26); color: #ffc08a; }
+.cal-d i.u.ok { background: rgba(53,196,106,.30); color: #7ee39f; }
+.cal-d i.u.mid { background: rgba(240,180,41,.30); color: #ffd36b; }
+.cal-d i.u.bad { background: rgba(224,96,96,.34); color: #ff8f8f; }
+.cal-d i.u.zero { background: transparent; box-shadow: inset 0 0 0 1px rgba(53,196,106,.55); color: #7ee39f; }
+.cal-d.now { border-color: #2f5d8c; }
+.cal-d.now .n { color: var(--accent); font-weight: 700; }
+.cal-d.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.cal-d.fut { background: transparent; border-color: #1b2128; }
+.cal-d.fut .n { color: #4b5866; }
+.cal-d.fut .r i { background: transparent; }
+@media (max-width: 380px) {
+  .cal-d { border-radius: 8px; padding: 0; }
+  .cal-d .n { font-size: 10px; line-height: 11px; height: 11px; }
+  .cal-d .r i { font-size: 12px; letter-spacing: -.02em; }
+  .cal-d svg.ic { width: 13px; height: 13px; }
+  .cal-d i.two svg.ic { width: 10px; height: 10px; }
+}
+.tile .tv.t-u-ok { color: #7ee39f; }
+.tile .tv.t-u-mid { color: #ffd36b; }
+.tile .tv.t-u-bad { color: #ff8f8f; }
+/* Impostazioni › il pallino del colore di una sostanza (bersaglio 48 px; il pallino resta dov'era: centro a 10 px) */
+.arow .lvl { width: 48px; height: 48px; flex: 0 0 48px; margin-left: -14px; background: none; border: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center; }
+.arow .lvl i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+.lv-ok { background: var(--up); } .lv-mid { background: var(--pr); } .lv-bad { background: var(--down); }
+h2.cal-day { margin-top: 22px; }
+.daylist { padding: 2px 14px; }
+.dline {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 0;
+  background: none; border: 0; border-top: 1px solid var(--edge); text-align: left; color: var(--print);
+}
+.dline:first-child { border-top: 0; }
+.dline .ic {
+  width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; display: flex; align-items: center;
+  justify-content: center; font-weight: 700; font-size: 14px; color: var(--c);
+  background: rgba(27,139,249,.18);
+}
+.dline .tx { flex: 1; min-width: 0; }
+.dline .tx b { display: block; font-weight: 600; font-size: 16px; }
+.dline .tx small { display: block; color: var(--print-dim); font-size: 13px; }
+.dline .vv { font-weight: 700; font-size: 17px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dline .vv.t-pr { color: var(--pr); }
+.dline .vv.t-live { color: var(--live); font-family: var(--f-print); text-transform: uppercase; letter-spacing: .06em; font-size: 15px; }
+
+/* --- il calendario: lineetta del sonno, scelta del mese ----------------- */
+.cal-title { background: none; border: 0; padding: 0; text-align: left; color: inherit; min-height: 44px; }
+.cal-title h1::after { content: ' ▾'; font-size: .55em; color: var(--print-dim); vertical-align: middle; }
+.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.mcell { min-height: 48px; border-radius: 10px; border: 1px solid var(--edge); background: var(--resin-2);
+         color: var(--print-dim); font-family: var(--f-print); font-size: 15px; font-weight: 700;
+         text-transform: uppercase; letter-spacing: .06em; }
+.mcell.has { color: var(--print); border-color: #3a4a5c; }
+.mcell.fut { opacity: .35; }
+
+/* --- sonno ---------------------------------------------------------------- */
+.big { font-family: var(--f-print); font-size: 64px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 28px; color: var(--print-dim); margin: 0 2px; }
+.sl-top { display: flex; align-items: flex-end; justify-content: space-between; margin: 8px 0 4px; }
+.sl-score { text-align: right; }
+.sl-score span { display: block; font-family: var(--f-print); font-size: 12px; font-weight: 700; letter-spacing: .1em;
+                 text-transform: uppercase; color: var(--print-dim); }
+.sl-score b { font-size: 34px; color: var(--sleep); font-variant-numeric: tabular-nums; }
+.hyp { position: relative; height: 88px; margin: 6px 0 4px; }
+.hyp i { position: absolute; height: 20px; border-radius: 3px; }
+.hyp-t { display: flex; justify-content: space-between; font-size: 12px; color: var(--print-dim); }
+.phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; font-size: 13px; color: var(--print-dim); }
+.phases b { display: block; font-size: 18px; color: var(--print); }
+.sl-nav { margin: 12px 0 0; }
+.sl-nav .btn[disabled] { opacity: .35; }
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 112px; }
+.bars button { flex: 1; background: none; border: 0; padding: 0; color: var(--print-dim); font-size: 11px;
+               display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; min-height: 44px; }
+.bars button i { display: block; border-radius: 4px; background: var(--sleep); opacity: .6; margin-bottom: 5px; }
+.bars button small { display: block; font-size: 10px; }
+.bars button.on { color: var(--print); font-weight: 700; }
+.bars button.on i { opacity: 1; }
+
+/* --- sport: i numeri di una seduta, lo scorrere fra le sedute ----------- */
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 8px; }
+.facts span { display: block; font-size: 12px; color: var(--print-dim); }
+.facts b { font-size: 19px; font-variant-numeric: tabular-nums; }
+.wcard { margin-top: 4px; }
+.wcard .kick { margin-bottom: 10px; }
+.snav { margin: 0 0 10px; }
+.snav .btn[disabled] { opacity: .35; }
+
+/* --- il giorno: quattro riquadri, 2 × 2 ----------------------------------- */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile {
+  min-height: 112px; border-radius: 14px; background: var(--resin-2); border: 1px solid var(--edge);
+  padding: 12px 14px; text-align: left; color: var(--print);
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 4px; position: relative;
+}
+.tile::before { content: ''; position: absolute; left: 14px; right: 14px; top: 0; height: 3px;
+                border-radius: 0 0 3px 3px; background: var(--c); opacity: .9; }
+.tile .tl { font-family: var(--f-print); font-size: 13px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: var(--c); margin-top: 4px; }
+.tile .tv { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tile .tv.t-pr { color: var(--pr); }
+.tile .tv.t-live { color: var(--live); font-size: 20px; }
+.tile small { font-size: 13px; color: var(--print-dim); line-height: 1.3;
+              display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tile.tile-empty .tv { color: var(--print-dim); }
+.tile[disabled] { opacity: .5; }
+
+/* --- la finestrella dal basso (giorni.js `pop`) ----------------------------- */
+#pop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 80; }
+#pop .pop-bg { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0,.55); }
+#pop .pop-box {
+  position: absolute; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow: auto;
+  background: var(--resin-2); border-top: 1px solid var(--edge); border-radius: 20px 20px 0 0;
+  padding: 10px 16px calc(16px + var(--safe-b)); max-width: 640px; margin: 0 auto;
+  animation: sale .18s ease-out;
+}
+@keyframes sale { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+#pop .grip { width: 40px; height: 4px; border-radius: 2px; background: var(--edge); margin: 0 auto 12px; }
+#pop .daylist { padding: 0; }
+.pop-t { margin: 4px 0 12px; color: var(--print); font-size: 20px; letter-spacing: .04em; }
+.pop-act { margin-top: 14px; }
+.pop-msg { margin: 6px 0 4px; color: var(--print); font-size: 17px; line-height: 1.4; white-space: pre-line; }
+.pop-num { display: block; width: 100%; margin-top: 12px; min-height: 56px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--edge);
+  background: var(--resin-2); color: var(--print); font: 700 24px var(--f-print); text-align: right; }
+.pop-act .btn { margin: 0; }
+.pop-set { display: block; margin: 12px auto 0; }
+
+/* --- sostanze: le spunte nella finestrella ---------------------------------- */
+.subs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sbt { position: relative; min-height: 84px; border-radius: 14px; background: var(--resin);
+       border: 1.5px solid var(--edge); padding: 12px 14px; text-align: left; color: var(--print);
+       display: flex; flex-direction: column; justify-content: flex-end; }
+.sbt b { font-size: 17px; font-weight: 700; padding-right: 30px; }
+.sbt small { font-size: 12px; color: var(--print-dim); }
+.sbt .c { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%;
+          border: 2px solid var(--edge); display: flex; align-items: center; justify-content: center; }
+.sbt.on { background: rgba(43,196,180,.16); border-color: var(--sub); }
+.sbt.on .c { background: var(--sub); border-color: var(--sub); color: #fff; }
+
+/* --- peso: le pesate del giorno e la conferma dello screenshot -------------- */
+.plist { display: flex; flex-direction: column; }
+.plist .sbt { margin-bottom: 10px; justify-content: flex-start; }
+.pbt.off { opacity: .55; }
+.pcard { padding: 12px 14px; margin-bottom: 10px; }
+.prow { display: flex; align-items: center; gap: 12px; }
+.prow .lnk { margin-left: auto; min-height: 44px; }
+.pt { font-size: 13px; color: var(--print-dim); padding-right: 30px; }
+.pkg { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--wt); }
+.pvals { display: flex; flex-wrap: wrap; margin-top: 6px; }
+.pvals span { display: flex; flex-direction: column; min-width: 33%; padding: 4px 0; }
+.pvals small { font-size: 12px; color: var(--print-dim); }
+.pvals b { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pwhy { margin-top: 6px; font-size: 13px; color: var(--print-dim); }
+.pwhy.warn { color: var(--wt); }
+.phelp { margin-top: 10px; }
+
+/* --- impostazioni: le sostanze a disposizione e il catalogo ----------------- */
+.avail { padding: 2px 14px; }
+.arow { display: flex; align-items: center; gap: 10px; min-height: 52px; border-top: 1px solid var(--edge); }
+.arow:first-child { border-top: 0; }
+.arow b { flex: 1; font-weight: 600; }
+.arow .lnk { min-height: 44px; }
+.arow .lnk.add { color: var(--sub); border-color: var(--sub); }
+.find { width: 100%; min-height: 50px; border-radius: 12px; border: 1px solid var(--edge); background: var(--resin-2);
+        color: var(--print); font: inherit; font-size: 16px; padding: 0 14px; margin-bottom: 8px; }
+.find:focus { outline: 2px solid var(--sub); outline-offset: 0; }
+.catk { margin: 14px 0 6px; }
+.btn.plus { width: 100%; margin-top: 12px; }
+/* l'ora dell'avviso della sera: due «− valore +» come in palestra (grid gap: c'è sulla WebView 69, flex gap no) */
+.sera-t { font-family: var(--f-seg); font-weight: 700; font-size: 24px; color: var(--sub); }
+.sera-k { display: grid; grid-template-columns: 1fr 1fr; grid-gap: 10px; padding: 4px 0 12px; }
+.sera-k .stp .val { justify-content: center; padding-right: 0; cursor: default; }
+.sera-k small { display: block; text-align: center; margin-top: 4px; color: var(--print-dim); font-size: 13px; }
+
+/* --- testata ------------------------------------------------------------- */
+.hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.hdr img { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: #fff; }
+.hdr .t { font-family: var(--f-print); font-weight: 700; font-size: 16px;
+          text-transform: uppercase; letter-spacing: .08em; }
+.hdr .s { color: var(--print-dim); font-size: 13px; }
+
+/* l'allenamento lasciato a metà: la stessa luce arancio del cronometro che gira */
+.card.live { border-color: var(--live); }
+.live-d { font-family: var(--f-print); font-size: 24px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: .03em; color: var(--live); margin: 0 0 2px; }
+
+/* --- scelta del giorno --------------------------------------------------- */
+.day {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px;
+  background: var(--resin-2); border: 1px solid var(--edge);
+  border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; text-align: left;
+}
+.day .n {
+  width: 46px; height: 46px; flex: 0 0 46px; font-size: 22px;
+}
+.day .txt { flex: 1; min-width: 0; }
+.day .txt b { display: block; font-family: var(--f-print); font-size: 20px; font-weight: 700;
+              text-transform: uppercase; letter-spacing: .04em; }
+.day .txt small { color: var(--print-dim); font-size: 13px; }
+.day.next { padding: 18px 16px; border-color: var(--accent); background: var(--resin-2); }
+.day.next .n { background: var(--accent-solid); color: #fff; }
+.day.next .n { width: 64px; height: 64px; flex-basis: 64px; font-size: 34px; }
+.day.next .txt b { font-size: 26px; }
+.badge {
+  font-family: var(--f-print); font-size: 13px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--print); border: 1px solid var(--print);
+  padding: 3px 8px; border-radius: 4px;
+}
+
+/* la striscia «finora»: un display solo, tre letture */
+.tally { display: flex; align-items: stretch; gap: 8px; margin-bottom: 22px; }
+.tally > div { flex: 1; text-align: center; }
+.tally .lcd { height: 56px; font-size: 26px; margin-bottom: 6px; }
+.tally > div > span { font-family: var(--f-print); font-size: 12px; font-weight: 700; letter-spacing: .12em;
+              text-transform: uppercase; color: var(--print-dim); }
+
+/* --- esercizio ----------------------------------------------------------- */
+.ex { background: var(--resin-2); border: 1px solid var(--edge);
+      border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+.ex.done { border-color: #24543a; }
+.ex-head { display: flex; gap: 12px; padding: 10px 12px 10px 10px; width: 100%; min-height: 72px;
+           background: none; border: 0; text-align: left; align-items: center; }
+.ex-imgs { display: flex; gap: 2px; flex: 0 0 98px; }
+.ex-imgs img { width: 48px; height: 48px; border-radius: 6px; background: #fff; object-fit: contain; }
+.ex-txt { flex: 1; min-width: 0; }
+.ex-txt .mus { font-family: var(--f-print); font-weight: 700; color: var(--print);
+               text-transform: uppercase; letter-spacing: .08em; }
+/* esercizio aperto: le miniature lasciano il posto alle figure grandi,
+   così la prima serie sale nella metà alta dello schermo */
+.ex.open .ex-imgs { display: none; }
+.ex.open .ex-head { min-height: 56px; padding-left: 12px; }
+.ex-txt .nm  { font-weight: 600; font-size: 16px; line-height: 1.2; }
+.ex-txt .sp  { font-size: 13px; color: var(--print-dim); margin-top: 2px; }
+.ex-tick { flex: 0 0 auto; min-width: 40px; text-align: right; font-family: var(--f-seg);
+           font-size: 15px; color: var(--print-dim); }
+.ex-tick.full { color: var(--up); }
+
+.ex-body { padding: 2px 10px 12px; border-top: 1px solid var(--edge); }
+.ex-body.hide { display: none; }
+.note { font-size: 14px; color: var(--print); background: var(--resin-3); border-radius: 8px;
+        padding: 9px 11px; margin: 10px 0; }
+.note b { font-family: var(--f-print); text-transform: uppercase; letter-spacing: .1em; color: var(--pr); }
+
+/* le due posizioni, a misura di sguardo: non devono spingere le serie
+   fuori dallo schermo */
+.ex-big { display: flex; gap: 6px; margin: 10px 0 4px; }
+.ex-big img { flex: 1; width: 50%; height: 120px; border-radius: 8px;
+              background: #fff; object-fit: contain; }
+
+/* --- l'ultima volta: una riga, stampata ---------------------------------- */
+.lastline {
+  font-size: 15px; color: var(--print); margin: 10px 0 8px;
+  font-variant-numeric: tabular-nums; line-height: 1.45;
+}
+.lastline span {
+  display: block; font-family: var(--f-print); font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .12em; color: var(--print-dim);
+}
+.prev { font-variant-numeric: tabular-nums; }
+
+/* --- le serie: niente tastiera, solo «−» e «+» --------------------------- */
+.setgrid { margin-top: 2px; }
+
+.shead, .setrow {
+  display: grid; gap: 8px; align-items: center;
+  grid-template-columns: 20px 1fr 1fr 50px;
+}
+.setgrid.noload .shead, .setgrid.noload .setrow { grid-template-columns: 20px 1fr 50px; }
+/* esercizio a tempo: dal 20/10 il cronometro è la spunta stessa, niente colonna in più */
+.shead span {
+  font-family: var(--f-print); font-size: 13px; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--print-dim); font-weight: 700; text-align: center; padding-bottom: 2px;
+}
+
+.setrow { margin-bottom: 8px; }
+.setrow .sn { font-family: var(--f-seg); font-size: 16px; color: var(--print-dim); text-align: center; }
+
+/* la colonna «− display +»: due tasti di gomma ai lati di un display */
+.stp {
+  display: grid; grid-template-columns: 48px 1fr 48px; gap: 4px; align-items: stretch;
+  background: var(--resin-3); border-radius: var(--r-key); padding: 4px;
+  box-shadow: none;
+}
+.stp button {
+  background: none; border: 0; font-family: var(--f-print); font-size: 28px; font-weight: 600;
+  color: var(--print); padding: 0; line-height: 1; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; min-height: 48px;
+}
+.stp button:active { background: #27303a; }
+.stp .val {
+  display: flex; align-items: center; justify-content: center; min-width: 0;
+  background: var(--resin); color: var(--print); border-radius: var(--r-lcd);
+  font-family: var(--f-seg); font-weight: 700; font-size: 24px; overflow: hidden;
+  cursor: pointer; user-select: none; transition: color .18s ease-out;
+}
+/* cifre a destra, come su ogni display vero: il cronometro che passa da
+   «0,9» a «1» non fa saltare il numero di lato */
+.stp .val { justify-content: flex-end; padding-right: 8px; }
+
+/* DUE contatori nella riga (chili + ripetizioni o secondi): in larghezza non
+   c'è posto per due display leggibili E quattro tasti da pollice (misurato:
+   53 px di display a 412, 27 px a 360 — «62,5» ne vuole 58). Allora ogni
+   contatore si impila: il display largo sopra, «−» e «+» sotto, ognuno metà.
+   La riga è più alta, ma i tasti sono più grandi e il numero si legge. */
+.setgrid:not(.noload) .stp, .setgrid.timed .stp {
+  grid-template-columns: 1fr 1fr; grid-template-rows: 44px 48px;
+  grid-template-areas: "v v" "m p";
+}
+.setgrid:not(.noload) .stp .val, .setgrid.timed .stp .val { grid-area: v; padding-right: 6px; }
+.setgrid:not(.noload) .stp .mn,  .setgrid.timed .stp .mn  { grid-area: m; }
+.setgrid:not(.noload) .stp .pl,  .setgrid.timed .stp .pl  { grid-area: p; }
+.setgrid:not(.noload) .tick, .setgrid.timed .tick { align-self: stretch; }
+/* (anche a tempo: «1:30.4» non entrava in un display stretto) */
+@media (max-width: 380px) {
+  .setgrid.timed:not(.noload) .stp[data-f="reps"] .val { font-size: 15px; }
+}
+
+/* "57.46 s" è più largo di "8": i secondi un filo più piccoli */
+.setgrid.timed .stp[data-f="reps"] .val { font-size: 19px; }
+
+/* la spunta: un tasto pieno quando la serie è fatta */
+.tick {
+  min-height: 56px; border-radius: var(--r-key); border: 2px solid var(--edge); background: transparent;
+  color: var(--resin); line-height: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.tick svg { width: 26px; height: 26px; visibility: hidden; }
+.tick:active { background: var(--resin-3); }
+/* fatta = tasto pieno nell'accento; poi prende il colore del verdetto
+   (verde meglio, rosso peggio, oro record), così spunta e numero dicono
+   sempre la stessa cosa. */
+.setrow.ok .tick { background: var(--accent-solid); border-color: var(--accent-solid); color: #fff; }
+.setrow.ok.up   .tick { background: var(--up);   border-color: var(--up); }
+.setrow.ok.down .tick { background: var(--down); border-color: var(--down); }
+.setrow.ok.rec  .tick { background: var(--pr);   border-color: var(--pr); color: #1c1406; }
+.setrow.ok .tick svg { visibility: visible; }
+/* in corsa (primo tocco): la spunta si accende come il cronometro e conta la serie */
+.tick { position: relative; }
+.tick .tt { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); line-height: 1;
+            font-family: var(--f-seg); font-size: 15px; font-weight: 700; text-align: center; }
+.setrow.run .tick { background: var(--live); border-color: var(--live); color: #1d0b02; }
+.setrow.ok .tick .tt { display: none; }
+
+/* fatta: la riga si calma, i tasti si spengono, il display resta leggibile */
+.setrow.ok .stp button { color: var(--print-dim); }
+.setrow.ok .sn  { color: var(--print); }
+
+/* il verdetto sta SUL NUMERO (come nella Scheda di prima) */
+.setrow.up   .stp .val { color: var(--up); }
+.setrow.down .stp .val { color: var(--down); }
+/* record dal vivo. La classe è `rec` e NON `pr`: `.pr` è la riga della lista
+   record e ruberebbe il suo display:flex. */
+.setrow.rec  .stp .val { color: var(--pr); }
+.setrow.rec  .sn       { color: var(--pr); }
+
+/* --- piè di pagina dell'esercizio ---------------------------------------- */
+.exfoot { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.lnk {
+  background: none; border: 1px solid var(--edge); border-radius: 10px; min-height: 48px;
+  padding: 0 12px; font-family: var(--f-print); font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--print);
+}
+.lnk:active { background: var(--resin-3); }
+
+/* --- «come si misura»: la correzione del modo ---------------------------- */
+.cfg { margin-top: 10px; padding: 12px; background: var(--resin-3); border-radius: 10px; }
+.cfg.hide { display: none; }
+.cfgrow { margin-bottom: 12px; }
+.cfgrow > span {
+  display: block; font-family: var(--f-print); font-size: 13px; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--print-dim); font-weight: 700; margin-bottom: 6px;
+}
+.seg { display: flex; gap: 6px; }
+.seg button {
+  flex: 1; min-height: 44px; padding: 8px 4px; font-size: 14px; font-weight: 600;
+  background: var(--resin-2); border: 1px solid var(--edge); border-radius: 8px; color: var(--print-dim);
+}
+.seg button.on { background: var(--accent-solid); border-color: var(--accent-solid); color: #fff; }
+.cfgnote { font-size: 13px; color: var(--print-dim); margin: 0; }
+
+/* --- esiti colorati (testo su cassa) ------------------------------------- */
+.v-up   { color: var(--up);   font-weight: 600; }
+.v-down { color: var(--down); font-weight: 600; }
+.v-same { color: var(--print); }
+.v-pr   { color: var(--pr);   font-weight: 600; }
+
+/* --- dettaglio di un allenamento passato --------------------------------- */
+.exname { font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+.dtl { display: flex; flex-direction: column; }
+.dtl > * + * { margin-top: 8px; }   /* non `gap`: sulla WebView 69 il flex gap non c'è */
+.dtlrow .when { grid-column: 2 / -1; margin-top: -4px; font-size: 13px; color: var(--print-dim);
+                font-variant-numeric: tabular-nums; }
+.dtlrow .when b { color: var(--down); font-weight: 600; }
+
+/* --- la linea del tempo: l'orologio sopra la seduta ----------------------- */
+.tlcard .kick { margin-bottom: 8px; }
+.tl { display: block; width: 100%; height: auto; margin: 0 0 8px; }
+.tl text { font-family: var(--f-text); font-size: 9px; fill: var(--print-dim); }
+.tl .tl-y { text-anchor: end; }
+.tl .tl-x { text-anchor: middle; }
+.tl .tl-grid { stroke: var(--edge); stroke-width: .6; }
+.tl .tl-none { fill: var(--resin-3); }
+.tl .tl-wrec { fill: var(--accent); opacity: .55; }
+.tl .tl-edge { stroke: var(--print-dim); stroke-width: .8; stroke-dasharray: 2 2; }
+.tl .tl-hr { fill: none; stroke: var(--down); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.tl .tl-dot { fill: var(--down); }
+.tl .tl-set.e0 { fill: var(--pr); }
+.tl .tl-set.e1 { fill: var(--wt); }
+.tl-key { display: flex; flex-wrap: wrap; font-size: 12px; color: var(--print-dim); margin: 0 0 10px; }
+.tl-key span { display: inline-flex; align-items: center; margin: 0 12px 4px 0; }
+.tl-key i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; margin-right: 5px; }
+.tl-key .k-hr { background: var(--down); height: 2px; }
+.tl-key .k-none { background: var(--resin-3); border: 1px solid var(--edge); }
+.tl-key .k-wrec { background: var(--accent); opacity: .55; }
+.tl-key .k-set { background: var(--pr); }
+.dtlrow { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; }
+.dtlrow .sn { font-family: var(--f-seg); font-size: 12px; color: var(--print-dim); }
+.lcd.chip small { font-size: .8em; }
+.lcd.chip { justify-self: start; height: 34px; padding: 0 10px; font-size: 16px; font-weight: 700; }
+.lcd.chip.v-up   { color: var(--up); }
+.lcd.chip.v-down { color: var(--down); }
+.lcd.chip.v-pr   { color: var(--pr); }
+/* I nomi sono `pill-pr` e non `pill pr`: `.pr` è già la riga della lista record. */
+.pill {
+  font-family: var(--f-print); font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; padding: 2px 8px; border-radius: 4px; min-width: 1px; white-space: nowrap;
+}
+.pill-pr   { background: var(--pr);   color: #241900; }
+.pill-up   { background: var(--up);   color: #062012; }
+.pill-down { background: var(--down); color: #2a0b05; }
+
+/* --- avanzamento: una barra sottile nell'accento ------------------------ */
+.prog { height: 6px; background: var(--resin-3); border-radius: 3px; overflow: hidden; margin: 12px 0 18px; }
+.prog i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .2s ease-out; }
+
+/* --- barra fissa durante l'allenamento: il quadrante grande -------------- */
+.livebar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  background: var(--resin); border-top: 1px solid var(--edge);
+  padding: 10px 14px calc(10px + var(--safe-b));
+  display: flex; gap: 10px; align-items: stretch;
+}
+.livebar .clock {
+  flex: 0 0 auto; min-width: 128px; height: 58px; padding: 0 12px; border: 0;
+  font-size: 26px; flex-direction: column; line-height: 1;
+}
+.livebar .clock small { display: block; font-family: var(--f-print); font-size: 12px; letter-spacing: .16em;
+                        margin: 0 0 4px; text-transform: uppercase; }
+.livebar .clock.rest { background: var(--accent-solid); color: #fff; }
+.livebar .clock.rest small { color: rgba(255,255,255,.85); }
+.livebar .count { align-self: center; font-family: var(--f-seg); font-size: 15px; color: var(--print-dim);
+                  min-width: 44px; text-align: center; }
+.livebar .btn { margin: 0; min-height: 58px; }
+
+/* --- storico ------------------------------------------------------------- */
+.hitem { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; min-height: 64px;
+         background: var(--resin-2); border: 1px solid var(--edge);
+         border-radius: 14px; padding: 12px; margin-bottom: 9px; }
+.hitem .num { width: 46px; height: 40px; flex: 0 0 46px; font-size: 17px; }
+.hitem .meta { flex: 1; min-width: 0; }
+.hitem .meta b { display: block; font-family: var(--f-print); font-size: 18px; font-weight: 700;
+                 text-transform: uppercase; letter-spacing: .04em; }
+.hitem .meta small { color: var(--print-dim); font-size: 13px; }
+.hitem .tags { display: flex; flex-direction: column; gap: 2px; align-items: flex-end;
+               font-family: var(--f-print); font-size: 14px; font-weight: 700; text-transform: uppercase;
+               letter-spacing: .06em; white-space: nowrap; }
+
+/* --- elenco «come si misura» in Scheda ----------------------------------- */
+.modelist { display: flex; flex-direction: column; }
+.moderow { display: flex; gap: 10px; align-items: baseline; padding: 9px 0;
+           border-bottom: 1px solid var(--edge); }
+.moderow:last-child { border-bottom: 0; }
+.moderow .nm { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; }
+.moderow .how { font-size: 13px; color: var(--print-dim); text-align: right; white-space: nowrap; }
+
+/* --- record: ogni riga un display oro ------------------------------------ */
+.pr { display: flex; align-items: center; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid var(--edge); }
+.pr:last-child { border-bottom: 0; }
+.pr .nm { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; }
+.pr .val { flex: 0 0 auto; min-width: 92px; height: 40px; padding: 0 10px; font-size: 16px;
+           color: var(--pr); }
+.pr .when { font-size: 13px; color: var(--print-dim); width: 58px; text-align: right; line-height: 1.25; }
+
+/* --- messaggini ---------------------------------------------------------- */
+#toast {
+  position: fixed; left: 50%; bottom: calc(100px + var(--safe-b)); transform: translateX(-50%) translateY(14px);
+  background: var(--print); color: var(--resin); padding: 12px 18px; border-radius: 8px;
+  font-family: var(--f-print); font-size: 17px; font-weight: 700; letter-spacing: .04em;
+  opacity: 0; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,.5);
+  transition: opacity .18s ease-out, transform .18s ease-out; z-index: 90; max-width: 88vw; text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.empty { text-align: center; color: var(--print-dim); padding: 46px 20px; font-size: 15px; line-height: 1.7; }
+
+/* --- Orologio nelle Impostazioni (orologio.js) ---------------------------- */
+.orologio .btn.big { margin-bottom: 10px; }
+.orologio .btn.small { margin-top: 4px; }
+.sub.small { font-size: 13px; margin-bottom: 10px; }
+.oro-msg { font-size: 15px; padding: 10px 12px; border-radius: var(--r-lcd); margin: 0 0 12px;
+           background: var(--resin-2); border: 1px solid var(--edge); }
+.oro-msg.good { border-color: #24563a; color: #9fe0b4; }
+.oro-msg.bad  { border-color: #5c3030; color: #e08585; }
+.oro-passo { margin: 0 0 12px; font-size: 14px; color: var(--print-dim); }
+.oro-passo[hidden] { display: none; }
+.oro-barra { height: 8px; border-radius: 4px; background: var(--resin-3); overflow: hidden; margin-bottom: 6px; }
+.oro-barra i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+input[type=file] { display: none; }
+.filelabel { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54px;
+             padding: 14px 16px; margin-bottom: 10px; border-radius: var(--r-key); background: var(--resin-3);
+             box-shadow: none;
+             font-family: var(--f-print); font-size: 18px; font-weight: 700; text-transform: uppercase;
+             letter-spacing: .08em; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* --- il foglio da stampare / salvare in PDF ------------------------------ */
+#sheet { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: #fff; color: #000; z-index: 100;
+         overflow: auto; padding: calc(16px + var(--safe-t)) 16px calc(16px + var(--safe-b)); display: none; }
+#sheet.on { display: block; }
+#sheet .close { position: sticky; top: 0; }
+#sheet .btn { box-shadow: none; }
+#sheet .btn.primary { background: #111; color: #fff; }
+#sheet .btn.ghost { color: #111; border-color: #999; }
+
+@media print {
+  body > *:not(#sheet) { display: none !important; }
+  #sheet { position: static; display: block !important; padding: 0; overflow: visible; }
+  #sheet .noprint { display: none !important; }
+  @page { size: A4; margin: 12mm; }
+
+  /* sulla carta il foglio prende tutta la pagina */
+  .sheet-doc { max-width: none; }
+
+  /* l'oro, il verde e il rosso devono arrivare anche sul PDF */
+  .sheet-doc, .sheet-doc * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+  /* niente allenamenti tagliati a metà pagina */
+  .sheet-doc tr { break-inside: avoid; }
+  .sheet-doc h2 { break-after: avoid; }
+  .sheet-doc thead { display: table-header-group; }
+  .sheet-doc .legend { break-inside: avoid; }
+}
+
+.sheet-doc { font-family: Georgia, "Times New Roman", serif; max-width: 760px; margin: 0 auto; }
+.sheet-doc h1 { font-family: Georgia, serif; text-transform: none; letter-spacing: 0;
+                font-size: 22px; margin: 0 0 2px; color: #000; }
+.sheet-doc h2 { font-family: -apple-system, system-ui, sans-serif;
+                font-size: 13px; color: #444; margin: 20px 0 7px; border-bottom: 1px solid #ccc;
+                padding-bottom: 3px; text-transform: uppercase; letter-spacing: .08em; }
+/* Colonne DICHIARATE, non contrattate: la larghezza la decide la tabella, la
+   cella delle serie va a capo, a non spezzarsi è il singolo valore. */
+.sheet-doc table { width: 100%; border-collapse: collapse; font-size: 12px;
+                   table-layout: fixed;
+                   font-family: -apple-system, system-ui, sans-serif; }
+.sheet-doc th:first-child { width: 42%; }
+.sheet-doc th { text-align: left; font-size: 10px; text-transform: uppercase; color: #555;
+                border-bottom: 1px solid #999; padding: 4px 5px; letter-spacing: .05em; }
+.sheet-doc td { padding: 4px 5px; border-bottom: 1px solid #eee; vertical-align: top; }
+.sheet-doc td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* ⚠ Questa riga sta DOPO `td.n` apposta: STESSA specificità (0,2,1), decide
+   l'ordine. Scritta prima, vinceva il `nowrap` e la cella sbordava. */
+.sheet-doc td.serie { white-space: normal; }
+.sheet-doc td.serie > span { white-space: nowrap; display: inline-block; margin-left: 11px; }
+.sheet-doc td.serie > span:first-child { margin-left: 0; }
+.sheet-doc .s-up   { color: #147a3d; font-weight: 700; }
+.sheet-doc .s-down { color: #b02626; font-weight: 700; }
+.sheet-doc .s-pr   { color: #9a6b00; font-weight: 800; }
+.sheet-doc .meta { font-size: 12px; color: #555; margin: 0 0 4px;
+                   font-family: -apple-system, system-ui, sans-serif; }
+.sheet-doc .legend { font-size: 10px; color: #666; margin-top: 18px; border-top: 1px solid #ddd;
+                     padding-top: 7px; font-family: -apple-system, system-ui, sans-serif; }
+
+/* «Tutto in PDF» (esporta.js): un giorno per riga, i riquadri uno sotto l'altro */
+.sheet-doc table.xp th { width: 64px; text-align: left; vertical-align: top; white-space: nowrap; }
+.sheet-doc table.xp td span { color: #555; }
+
+/* --- My workouts (mine.js) -----------------------------------------
+   Niente flex gap (WebView 69): margini; il grid gap c'è. Bersagli >= 44 px. */
+.subbtn.sub-mine { line-height: 1.05; padding: 2px 2px; }
+#subnav .subbtn + .subbtn { margin-left: 0; }
+.mw-name { font-size: 20px; font-weight: 600; margin: 4px 0 12px; }
+.mw-item { padding: 12px; }
+.mw-ihead { display: flex; align-items: center; margin-bottom: 10px; }
+.mw-ihead img { width: 64px; height: 64px; flex: 0 0 64px; border-radius: 8px; background: #fff; object-fit: contain; margin-right: 12px; }
+.mw-ihead .tx { flex: 1; min-width: 0; }
+.mw-ihead .tx b { display: block; font-weight: 600; font-size: 16px; line-height: 1.25; }
+.mw-ihead .tx small { display: block; color: var(--print-dim); font-size: 13px; text-transform: capitalize; }
+.mw-k { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-gap: 8px; margin-bottom: 8px; }
+.mw-k.two { grid-template-columns: 1fr 1fr; }
+.mw-k .stp { grid-template-columns: 1fr 1fr; grid-template-rows: 44px 48px; grid-template-areas: "v v" "m p"; }
+.mw-k .stp .val { grid-area: v; justify-content: center; padding-right: 0; font-size: 22px; }
+.mw-k .stp .mn { grid-area: m; }
+.mw-k .stp .pl { grid-area: p; }
+.mw-k small { display: block; text-align: center; margin-top: 4px; color: var(--print-dim); font-size: 13px;
+  font-family: var(--f-print); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+.mw-seg { margin-bottom: 8px; }
+.mw-seg button + button, .mw-tools .lnk + .lnk { margin-left: 6px; }
+.seg.mw-seg { display: flex; }
+.mw-tools { display: flex; margin-top: 4px; }
+.mw-tools .lnk { flex: 1; }
+.mw-tools .lnk:disabled { opacity: .35; }
+.mw-tools .mw-del { color: #e08585; border-color: #5c3030; }
+.btn:disabled { opacity: .4; }
+.mw-fk { margin: 10px 0 6px; }
+.mw-chips { display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 6px; margin: 0 -14px; padding-left: 14px; padding-right: 14px;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.mw-chips::-webkit-scrollbar { display: none; }
+.mw-chip { flex: 0 0 auto; min-height: 44px; padding: 0 14px; margin-right: 6px; border-radius: 22px; border: 1px solid var(--edge);
+  background: var(--resin-2); color: var(--print-dim); font-size: 15px; font-weight: 600; text-transform: capitalize; }
+.mw-chip.on { background: var(--accent-solid); border-color: var(--accent-solid); color: #fff; }
+.mw-count { margin: 12px 0 8px; }
+.mw-list { padding: 2px 0 2px 12px; }
+.mw-row { display: flex; align-items: center; border-top: 1px solid var(--edge); }
+.mw-row:first-child { border-top: 0; }
+.mw-open { flex: 1; min-width: 0; display: flex; align-items: center; min-height: 76px; padding: 6px 0; background: none; border: 0;
+  text-align: left; color: var(--print); }
+.mw-open img { width: 64px; height: 64px; flex: 0 0 64px; border-radius: 8px; background: #fff; object-fit: contain; margin-right: 12px; }
+.mw-open .tx { flex: 1; min-width: 0; }
+.mw-open .tx b { display: block; font-weight: 600; font-size: 16px; line-height: 1.25; }
+.mw-open .tx small { display: block; color: var(--print-dim); font-size: 13px; text-transform: capitalize; }
+.mw-plus { flex: 0 0 60px; width: 60px; height: 60px; margin: 0 6px 0 4px; border-radius: var(--r-key); border: 2px solid var(--edge);
+  background: transparent; color: var(--print); font-size: 30px; font-weight: 600; line-height: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center; }
+.mw-plus svg { width: 26px; height: 26px; }
+.mw-row.in .mw-plus { background: var(--accent-solid); border-color: var(--accent-solid); color: #fff; }
+.mw-big { display: flex; margin: 8px 0 14px; }
+.mw-big figure { flex: 1; width: 50%; margin: 0; position: relative; }
+.mw-big figure + figure { margin-left: 6px; }
+.mw-big img { display: block; width: 100%; height: auto; border-radius: 8px; background: #fff; }
+.mw-big figcaption { position: absolute; left: 6px; top: 6px; background: rgba(13,16,19,.8); color: #fff; border-radius: 6px;
+  padding: 2px 8px; font-family: var(--f-print); font-weight: 700; font-size: 14px; }
+.facts.mw-facts { grid-template-columns: 1fr 1fr; }
+.facts.mw-facts b { font-size: 16px; text-transform: capitalize; }
+.mw-how { padding: 14px 14px 14px 34px; }
+.mw-how li { margin-bottom: 8px; line-height: 1.45; }
+.mw-how li:last-child { margin-bottom: 0; }

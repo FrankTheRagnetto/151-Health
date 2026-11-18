@@ -1,0 +1,19 @@
+node_modules/
+tests/shots/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+*.apk
+# la chiave NON va mai in git (password dentro keystore.properties)
+.signing/
+
+# rete di sicurezza: chiavi e config locali in qualunque cartella
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+dist/
+www/data/
+private/
+tests/fixtures/

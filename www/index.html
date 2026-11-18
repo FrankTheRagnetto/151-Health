@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0d1013">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Health">
+<title>151 Health</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--
+The 151 Health — la tua salute in un posto. Aspetto «Notte blu».
+Barra in fondo: Giorni, Sport, Sonno, Impostazioni. Sostanze e peso non sono
+sezioni: sono riquadri del giorno. La palestra è uno sport: sta dentro Sport. Dentro Palestra, in alto, le quattro pagine
+della Scheda di sempre.
+-->
+
+<!-- dentro Sport: la palestra (la Scheda) e tutti gli allenamenti -->
+<div id="subnav">
+  <button data-go="#/home"        class="subbtn">Gym</button>
+  <button data-go="#/mine"        class="subbtn sub-mine">My workouts</button>
+  <button data-go="#/allenamenti" class="subbtn">Workouts</button>
+  <button data-go="#/record"  class="subbtn">Records</button>
+  <button data-go="#/scheda"  class="subbtn">Plan</button>
+</div>
+
+<div id="app" aria-live="polite"></div>
+
+<!-- le zone dell'app, sempre in fondo -->
+<nav id="nav">
+  <button data-go="#/giorni" data-area="giorni"   class="navbtn" style="--c:var(--accent)">Days</button>
+  <button data-go="#/home"   data-area="sport"    class="navbtn" style="--c:var(--sport)">Sport</button>
+  <button data-go="#/sonno"    data-area="sonno"    class="navbtn" style="--c:var(--sleep)">Sleep</button>
+  <button data-go="#/impostazioni" data-area="impostazioni" class="navbtn" style="--c:var(--print-dim)">Settings</button>
+</nav>
+
+<div id="toast" role="status"></div>
+
+<script src="parse-mht.js"></script>
+<script src="giorni.js"></script>
+<script src="sonno.js"></script>
+<script src="app.js"></script>
+<script src="sport.js"></script>
+<script src="mine.js"></script>
+<script src="sostanze-catalogo.js"></script>
+<script src="sostanze.js"></script>
+<script src="peso.js"></script>
+<script src="impostazioni.js"></script>
+<script src="sport-tipi.js"></script>
+<script src="orologio.js"></script>
+<script src="esporta.js"></script>
+</body>
+</html>

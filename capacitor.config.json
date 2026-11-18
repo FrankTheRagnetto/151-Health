@@ -1,0 +1,16 @@
+{
+  "appId": "com.the151universe.health",
+  "appName": "151 Health",
+  "webDir": "www",
+  "backgroundColor": "#0d1013",
+  "plugins": {
+    "SystemBars": {
+      "style": "DARK",
+      "initialViewportFitValueHint": "cover"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_health",
+      "iconColor": "#2bc4b4"
+    }
+  }
+}
